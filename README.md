@@ -1,75 +1,34 @@
-# React + TypeScript + Vite
+# ⚡ Miles Lab
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to **Miles Lab**, a production-grade React & TypeScript monorepo designed to build, organize, and showcase 25 modular web applications under a single unified hub.
 
-Currently, two official plugins are available:
+## 🛠️ Tech Stack
+* **Framework:** React 18+ / Vite
+* **Language:** TypeScript
+* **Styling:** Tailwind CSS
+* **Icons:** Lucide React
+* **Persistence:** Browser `localStorage` (Session & State Management)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 📁 Completed Projects Included (8 / 25)
+1. **00 - Central Dashboard Hub**: Master navigation hub with sidebar routing and project categorization.
+2. **01 - Calculator**: High-precision math utility with clean state architecture.
+3. **02 - Digital Clock**: Real-time timezone and clock management.
+4. **03 - To-Do List (DnD)**: Task management powered by HTML5 Drag-and-Drop.
+5. **04 - Weather App**: Live REST API integration using Open-Meteo with async/await error handling.
+6. **05 - Auth & RBAC Gateway**: Secure session management and Role-Based Access Control (Admin, Teacher, Student).
+7. **06 - Quiz LMS Portal**: Dual-mode Learning Management System with a Student quiz-taker and a Teacher authoring/hosting dashboard.
+8. **07 - Pomodoro Focus Timer**: State-driven interval timer with focus/break cycles and completion tracking.
+13. **13 - Supermarket Hub**: E-commerce storefront paired with an active inventory CRUD admin panel.
 
-## React Compiler
+## 🚀 Getting Started Locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/milesmorales-cloud/miles-lab.git](https://github.com/milesmorales-cloud/miles-lab.git)
+   cd miles-lab
 
-## Expanding the ESLint configuration
+2. **Install dependecies:**
+    npm install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
-
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+3. **Run the development server:**
+    npm run dev
