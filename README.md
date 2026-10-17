@@ -28,7 +28,9 @@ Welcome to **Miles Lab**, a production-grade React & TypeScript monorepo designe
    cd miles-lab
 
 2. **Install dependecies:**
+   ```bash
     npm install
 
 3. **Run the development server:**
+   ```bash
     npm run dev
