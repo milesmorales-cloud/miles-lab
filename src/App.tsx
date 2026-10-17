@@ -12,7 +12,9 @@ import {
   ChevronRight, 
   FolderGit2, 
   Sparkles, 
-  Timer
+  Timer,
+  FileText,
+  Utensils
 } from 'lucide-react';
 
 // Import your project components
@@ -24,7 +26,11 @@ import LoginForm from './projects/05-login-form/LoginForm';
 import QuizApp from './projects/06-quiz-app/QuizApp';
 import PomodoroApp from './projects/07-pomodoro/PomodoroApp';
 import ExpenseTracker from './projects/08-expense-tracker/ExpenseTracker';
+import MarkdownPreviewer from './projects/09-markdown-previewer/MarkdownPreviewer';
+import NotesVault from './projects/10-notes-vault/NotesVault';
 import ShoppingCart from './projects/13-shopping-cart/ShoppingCart';
+import RecipePlanner from './projects/11-recipe-planner/RecipePlanner';
+import HabitTracker from './projects/12-habit-tracker/HabitTracker';
 
 interface ProjectItem {
   id: string;
@@ -48,6 +54,10 @@ export default function App() {
     { id: 'quiz', number: '06', title: 'Quiz LMS Portal', category: 'Education', icon: HelpCircle, component: QuizApp },
     { id: 'pomodoro', number: '07', title: 'Pomodoro Focus Timer', category: 'Productivity', icon: Timer, component: PomodoroApp },
     { id: 'expenses', number: '08', title: 'Expense Tracker', category: 'Finance', icon: Wallet, component: ExpenseTracker },
+    { id: 'markdown', number: '09', title: 'Markdown Previewer', category: 'Productivity', icon: FileText, component: MarkdownPreviewer },
+    { id: 'notes', number: '10', title: 'Notes Vault', category: 'Productivity', icon: FileText, component: NotesVault },
+    { id: 'recipe', number: '11', title: 'Recipe Planner', category: 'Food & Drink', icon: Utensils, component: RecipePlanner },
+    { id: 'habit', number: '12', title: 'Habit Tracker', category: 'Productivity', icon: CheckSquare, component: HabitTracker },
     { id: 'shop', number: '13', title: 'Supermarket Hub', category: 'E-Commerce', icon: ShoppingBag, component: ShoppingCart },
   ];
 
@@ -143,6 +153,10 @@ function HubOverview({ onSelect }: { onSelect: (id: string) => void }) {
     { id: 'quiz', number: '06', title: 'Quiz LMS Portal', category: 'Education', icon: HelpCircle },
     { id: 'pomodoro', number: '07', title: 'Pomodoro Focus Timer', category: 'Productivity', icon: Timer },
     { id: 'expenses', number: '08', title: 'Expense Tracker', category: 'Finance', icon: Wallet },
+    { id: 'markdown', number: '09', title: 'Markdown Previewer', category: 'Productivity', icon: FileText },
+    { id: 'notes', number: '10', title: 'Notes Vault', category: 'Productivity', icon: FileText },
+    { id: 'recipe', number: '11', title: 'Recipe Planner', category: 'Food & Drink', icon: Utensils },
+    { id: 'habit', number: '12', title: 'Habit Tracker', category: 'Productivity', icon: CheckSquare },
     { id: 'shop', number: '13', title: 'Supermarket Hub', category: 'E-Commerce', icon: ShoppingBag },
   ];
 
