@@ -5,12 +5,14 @@ import {
   CheckSquare, 
   CloudSun, 
   Lock, 
+  Wallet,
   HelpCircle, 
   ShoppingBag, 
   LayoutDashboard, 
   ChevronRight, 
   FolderGit2, 
-  Sparkles 
+  Sparkles, 
+  Timer
 } from 'lucide-react';
 
 // Import your project components
@@ -20,6 +22,8 @@ import TodoList from './projects/03-todo-list/TodoList';
 import WeatherApp from './projects/04-weather-app/WeatherApp';
 import LoginForm from './projects/05-login-form/LoginForm';
 import QuizApp from './projects/06-quiz-app/QuizApp';
+import PomodoroApp from './projects/07-pomodoro/PomodoroApp';
+import ExpenseTracker from './projects/08-expense-tracker/ExpenseTracker';
 import ShoppingCart from './projects/13-shopping-cart/ShoppingCart';
 
 interface ProjectItem {
@@ -42,6 +46,8 @@ export default function App() {
     { id: 'weather', number: '04', title: 'Weather App', category: 'API Integration', icon: CloudSun, component: WeatherApp },
     { id: 'auth', number: '05', title: 'Auth & RBAC Gateway', category: 'Security', icon: Lock, component: LoginForm },
     { id: 'quiz', number: '06', title: 'Quiz LMS Portal', category: 'Education', icon: HelpCircle, component: QuizApp },
+    { id: 'pomodoro', number: '07', title: 'Pomodoro Focus Timer', category: 'Productivity', icon: Timer, component: PomodoroApp },
+    { id: 'expenses', number: '08', title: 'Expense Tracker', category: 'Finance', icon: Wallet, component: ExpenseTracker },
     { id: 'shop', number: '13', title: 'Supermarket Hub', category: 'E-Commerce', icon: ShoppingBag, component: ShoppingCart },
   ];
 
@@ -135,6 +141,8 @@ function HubOverview({ onSelect }: { onSelect: (id: string) => void }) {
     { id: 'weather', number: '04', title: 'Weather App', category: 'API Integration', icon: CloudSun },
     { id: 'auth', number: '05', title: 'Auth & RBAC Gateway', category: 'Security', icon: Lock },
     { id: 'quiz', number: '06', title: 'Quiz LMS Portal', category: 'Education', icon: HelpCircle },
+    { id: 'pomodoro', number: '07', title: 'Pomodoro Focus Timer', category: 'Productivity', icon: Timer },
+    { id: 'expenses', number: '08', title: 'Expense Tracker', category: 'Finance', icon: Wallet },
     { id: 'shop', number: '13', title: 'Supermarket Hub', category: 'E-Commerce', icon: ShoppingBag },
   ];
 
