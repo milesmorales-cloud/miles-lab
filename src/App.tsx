@@ -9,12 +9,15 @@ import {
   HelpCircle, 
   ShoppingBag, 
   LayoutDashboard, 
+  ChevronLeft,
   ChevronRight, 
   FolderGit2, 
   Sparkles, 
   Timer,
   FileText,
-  Utensils
+  Utensils,
+  Columns,
+  Calendar
 } from 'lucide-react';
 
 // Import your project components
@@ -31,6 +34,8 @@ import NotesVault from './projects/10-notes-vault/NotesVault';
 import ShoppingCart from './projects/13-shopping-cart/ShoppingCart';
 import RecipePlanner from './projects/11-recipe-planner/RecipePlanner';
 import HabitTracker from './projects/12-habit-tracker/HabitTracker';
+import KanbanBoard from './projects/14-kanban-board/KanbanBoard';
+import BookingCalendar from './projects/15-booking-calendar/BookingCalendar';
 
 interface ProjectItem {
   id: string;
@@ -43,6 +48,7 @@ interface ProjectItem {
 
 export default function App() {
   const [activeId, setActiveId] = useState('hub');
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const PROJECTS: ProjectItem[] = [
     { id: 'hub', number: '00', title: 'Dashboard Overview', category: 'Home', icon: LayoutDashboard, component: () => <HubOverview onSelect={setActiveId} /> },
@@ -59,6 +65,8 @@ export default function App() {
     { id: 'recipe', number: '11', title: 'Recipe Planner', category: 'Food & Drink', icon: Utensils, component: RecipePlanner },
     { id: 'habit', number: '12', title: 'Habit Tracker', category: 'Productivity', icon: CheckSquare, component: HabitTracker },
     { id: 'shop', number: '13', title: 'Supermarket Hub', category: 'E-Commerce', icon: ShoppingBag, component: ShoppingCart },
+    { id: 'kanban', number: '14', title: 'Kanban Board', category: 'Productivity', icon: Columns, component: KanbanBoard },
+    { id: 'booking', number: '15', title: 'Booking Calendar', category: 'Productivity', icon: Calendar, component: BookingCalendar },
   ];
 
   const activeProject = PROJECTS.find(p => p.id === activeId) || PROJECTS[0];
@@ -68,23 +76,34 @@ export default function App() {
     <div className="min-h-screen bg-slate-950 text-white flex flex-col md:flex-row">
       
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-72 bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-between shrink-0">
+      <aside className={`w-full ${isExpanded ? 'md:w-64' : 'md:w-20'} bg-slate-900 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-between shrink-0 transition-[width] duration-300 ease-in-out`}>
         <div>
           {/* Logo / Header */}
-          <div className="p-6 border-b border-slate-800 flex items-center gap-3">
+          <div className={`border-b border-slate-800 flex items-center justify-between ${isExpanded ? 'p-6' : 'p-4'}`}>
+            <div className={`flex items-center ${isExpanded ? 'gap-3' : ''}`}>
             <div className="w-9 h-9 bg-indigo-600/20 border border-indigo-500/30 rounded-xl flex items-center justify-center text-indigo-400">
               <FolderGit2 className="w-5 h-5" />
             </div>
-            <div>
+            {isExpanded && <div>
               <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
                 Miles Lab ⚡
               </h1>
               <p className="text-[11px] text-slate-400">React Monorepo (7/25)</p>
+            </div>}
             </div>
+            <button
+              type="button"
+              onClick={() => setIsExpanded(expanded => !expanded)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+              title={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            >
+              {isExpanded ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </button>
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-4 space-y-1.5 max-h-[calc(100vh-140px)] overflow-y-auto no-scrollbar">
+          <nav aria-label="Project navigation" tabIndex={0} className={`space-y-1.5 max-h-[calc(100vh-140px)] overflow-y-auto scroll-smooth no-scrollbar ${isExpanded ? 'p-4' : 'p-3'}`}>
             {PROJECTS.map(project => {
               const IconComponent = project.icon;
               const isActive = activeId === project.id;
@@ -93,20 +112,25 @@ export default function App() {
                 <button
                   key={project.id}
                   onClick={() => setActiveId(project.id)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                  aria-label={`${project.number}. ${project.title}, ${project.category}`}
+                  title={!isExpanded ? `${project.number}. ${project.title} · ${project.category}` : undefined}
+                  className={`w-full flex items-center rounded-xl text-xs font-medium transition-all cursor-pointer ${isExpanded ? 'justify-between px-3.5 py-2.5' : 'justify-center flex-col gap-1.5 px-2 py-2.5'} ${
                     isActive
                       ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold'
                       : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className={`flex items-center ${isExpanded ? 'gap-3 min-w-0' : 'flex-col gap-1'}`}>
                     <IconComponent className={`w-4 h-4 ${isActive ? 'text-white' : 'text-indigo-400'}`} />
-                    <span className="text-left">
-                      <span className="font-mono text-[10px] opacity-75 mr-1.5">{project.number}.</span>
-                      {project.title}
+                    <span className={`font-mono text-[10px] opacity-75 ${isExpanded ? 'hidden' : ''}`}>
+                      {project.number}
                     </span>
+                    {isExpanded && <span className="text-left min-w-0">
+                      <span className="block truncate"><span className="font-mono text-[10px] opacity-75 mr-1.5">{project.number}.</span>{project.title}</span>
+                      <span className="block text-[10px] text-slate-400/80 mt-0.5">{project.category}</span>
+                    </span>}
                   </div>
-                  {isActive && <ChevronRight className="w-3.5 h-3.5" />}
+                  {isActive && isExpanded && <ChevronRight className="w-3.5 h-3.5 shrink-0" />}
                 </button>
               );
             })}
@@ -114,8 +138,8 @@ export default function App() {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-800 text-center text-[11px] text-slate-500">
-          React • TypeScript • Vite • Tailwind
+        <div className={`border-t border-slate-800 text-center text-[11px] text-slate-500 ${isExpanded ? 'p-4' : 'p-3'}`}>
+          {isExpanded && <>React • TypeScript • Vite • Tailwind</>}
         </div>
       </aside>
 
@@ -158,6 +182,8 @@ function HubOverview({ onSelect }: { onSelect: (id: string) => void }) {
     { id: 'recipe', number: '11', title: 'Recipe Planner', category: 'Food & Drink', icon: Utensils },
     { id: 'habit', number: '12', title: 'Habit Tracker', category: 'Productivity', icon: CheckSquare },
     { id: 'shop', number: '13', title: 'Supermarket Hub', category: 'E-Commerce', icon: ShoppingBag },
+    { id: 'kanban', number: '14', title: 'Kanban Board', category: 'Productivity', icon: Columns },
+    { id: 'booking', number: '15', title: 'Booking Calendar', category: 'Productivity', icon: Calendar },
   ];
 
   return (

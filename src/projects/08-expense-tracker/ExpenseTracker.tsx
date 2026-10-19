@@ -21,6 +21,15 @@ export default function ExpenseTracker() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [budgets, setBudgets] = useState<Record<string, number>>(() => {
+    const saved = localStorage.getItem('miles_lab_budgets');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [filterCategory, setFilterCategory] = useState('All');
+  const [filterMonth, setFilterMonth] = useState('All');
+
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<'income' | 'expense'>('expense');
@@ -30,6 +39,10 @@ export default function ExpenseTracker() {
   useEffect(() => {
     localStorage.setItem('miles_lab_expenses', JSON.stringify(transactions));
   }, [transactions]);
+
+  useEffect(() => {
+    localStorage.setItem('miles_lab_budgets', JSON.stringify(budgets));
+  }, [budgets]);
 
   // Update category options when type changes
   const handleTypeChange = (newType: 'income' | 'expense') => {
@@ -41,19 +54,39 @@ export default function ExpenseTracker() {
     e.preventDefault();
     if (!description.trim() || !amount || Number(amount) <= 0) return;
 
-    const newTx: Transaction = {
-      id: Date.now().toString(),
-      description: description.trim(),
-      amount: parseFloat(amount),
-      type,
-      category,
-      date: new Date().toISOString().split('T')[0]
-    };
-
-    setTransactions([newTx, ...transactions]);
+    if (editingId) {
+      setTransactions(transactions.map(t => t.id === editingId ? {
+        ...t, description: description.trim(), amount: parseFloat(amount), type, category
+      } : t));
+      setEditingId(null);
+    } else {
+      const newTx: Transaction = {
+        id: Date.now().toString(),
+        description: description.trim(),
+        amount: parseFloat(amount),
+        type,
+        category,
+        date: new Date().toISOString().split('T')[0]
+      };
+      setTransactions([newTx, ...transactions]);
+    }
     setDescription('');
     setAmount('');
   };
+
+  const startEdit = (t: Transaction) => {
+    setEditingId(t.id);
+    setDescription(t.description);
+    setAmount(String(t.amount));
+    setType(t.type);
+    setCategory(t.category);
+  };
+
+  const filteredTransactions = transactions.filter(t => {
+    if (filterCategory !== 'All' && t.category !== filterCategory) return false;
+    if (filterMonth !== 'All' && !t.date.startsWith(filterMonth)) return false;
+    return true;
+  });
 
   const deleteTransaction = (id: string) => {
     setTransactions(transactions.filter(t => t.id !== id));
@@ -218,26 +251,35 @@ export default function ExpenseTracker() {
               <PieChart className="w-4 h-4 text-indigo-400" /> Spending Breakdown
             </h3>
             
-            {expenseByCategory.length === 0 ? (
-              <p className="text-xs text-slate-500 text-center py-4">No expenses recorded yet.</p>
-            ) : (
+            {true ? (
               <div className="space-y-3">
-                {expenseByCategory.map(item => (
-                  <div key={item.category} className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-300 font-medium">{item.category}</span>
-                      <span className="font-mono text-slate-400">${item.total.toFixed(2)} ({item.percentage.toFixed(0)}%)</span>
+                {CATEGORIES.expense.map(cat => {
+                  const spent = transactions.filter(t=>t.type==='expense'&&t.category===cat).reduce((a,t)=>a+t.amount,0);
+                  const cap = budgets[cat] || 0;
+                  const pct = cap>0 ? Math.min(100,(spent/cap)*100) : 0;
+                  const warn = cap>0 && spent >= cap*0.8;
+                  const over = cap>0 && spent > cap;
+                  return (
+                    <div key={cat} className="space-y-1">
+                      <div className="flex justify-between text-xs items-center gap-2">
+                        <span className="text-slate-300 font-medium">{cat}</span>
+                        <input type="number" placeholder="budget" value={budgets[cat]||''} onChange={e=>setBudgets({...budgets,[cat]:Number(e.target.value)})} className="w-20 bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-[10px] text-white" />
+                      </div>
+                      <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                        <span>${spent.toFixed(2)}{cap>0?` / $${cap}`:''}</span>
+                        {over && <span className="text-rose-400 font-semibold">Over budget</span>}
+                        {warn && !over && <span className="text-amber-400">Near limit</span>}
+                      </div>
+                      {cap>0 && (
+                        <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                          <div className={`${over?'bg-rose-500':warn?'bg-amber-500':'bg-indigo-500'} h-full rounded-full transition-all duration-500`} style={{ width: `${pct}%` }}></div>
+                        </div>
+                      )}
                     </div>
-                    <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
-                      <div
-                        className="bg-indigo-500 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${item.percentage}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-            )}
+            ) : null}
           </div>
 
         </div>
@@ -247,14 +289,24 @@ export default function ExpenseTracker() {
           <h3 className="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
             <Calendar className="w-4 h-4 text-indigo-400" /> Transaction History
           </h3>
+          <div className="flex gap-2 mb-3">
+            <select value={filterCategory} onChange={e=>setFilterCategory(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white">
+              <option value="All">All Categories</option>
+              {[...CATEGORIES.income,...CATEGORIES.expense].map(c=><option key={c} value={c}>{c}</option>)}
+            </select>
+            <select value={filterMonth} onChange={e=>setFilterMonth(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white">
+              <option value="All">All Months</option>
+              {Array.from(new Set(transactions.map(t=>t.date.slice(0,7)))).map(m=><option key={m} value={m}>{m}</option>)}
+            </select>
+          </div>
 
-          <div className="flex-1 overflow-y-auto max-h-125 space-y-2.5 pr-1">
-            {transactions.length === 0 ? (
+          <div className="flex-1 overflow-y-auto max-h-125 space-y-2.5 pr-1 [&::-webkit-scrollbar]:hidden">
+            {filteredTransactions.length === 0 ? (
               <div className="text-center py-12 text-slate-500 text-xs">
                 No transactions found. Switch to Income and add your earnings to get started!
               </div>
             ) : (
-              transactions.map(t => (
+              filteredTransactions.map(t => (
                 <div
                   key={t.id}
                   className="flex items-center justify-between p-3.5 bg-slate-950/60 border border-slate-800 rounded-xl hover:border-slate-700 transition-all"
@@ -285,6 +337,13 @@ export default function ExpenseTracker() {
                     }`}>
                       {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
                     </span>
+                    <button
+                      onClick={() => startEdit(t)}
+                      className="text-slate-500 hover:text-indigo-400 p-1.5 rounded-lg hover:bg-slate-900 transition-all cursor-pointer"
+                      title="Edit transaction"
+                    >
+                      <Tag className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => deleteTransaction(t.id)}
                       className="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-900 transition-all cursor-pointer"

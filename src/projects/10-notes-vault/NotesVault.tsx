@@ -1,33 +1,41 @@
 import { useState, useEffect } from 'react';
-import { FileText, Plus, Trash2, Search, Calendar, Edit3, Eye, Download, Copy, Check } from 'lucide-react';
+import { FileText, Plus, Trash2, Search, Calendar, Edit3, Eye, Download, Copy, Check, Tag } from 'lucide-react';
 
 interface Note {
   id: string;
   title: string;
   content: string;
+  tags: string[];
   updatedAt: string;
 }
+
+const CATEGORIES = ['Work', 'Personal', 'Ideas', 'Study', 'Other'];
 
 export default function NotesVault() {
   const [notes, setNotes] = useState<Note[]>(() => {
     const saved = localStorage.getItem('miles_lab_notes_vault');
-    return saved ? JSON.parse(saved) : [];
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed.map((n: any) => ({ ...n, tags: n.tags || [] }));
+    }
+    return [];
   });
 
   const [activeId, setActiveId] = useState<string | null>(() => {
     const saved = localStorage.getItem('miles_lab_notes_vault');
     if (saved) {
-      const parsed: Note[] = JSON.parse(saved);
+      const parsed = JSON.parse(saved);
       return parsed.length > 0 ? parsed[0].id : null;
     }
     return null;
   });
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'split' | 'edit' | 'preview'>('split');
   const [copied, setCopied] = useState(false);
+  const [tagInput, setTagInput] = useState('');
 
-  // Sync to localStorage
   useEffect(() => {
     localStorage.setItem('miles_lab_notes_vault', JSON.stringify(notes));
   }, [notes]);
@@ -39,6 +47,7 @@ export default function NotesVault() {
       id: Date.now().toString(),
       title: 'Untitled Note',
       content: '# Untitled Note\n\nStart writing your thoughts here...',
+      tags: [],
       updatedAt: new Date().toISOString().split('T')[0],
     };
     setNotes([newNote, ...notes]);
@@ -47,22 +56,38 @@ export default function NotesVault() {
 
   const updateActiveContent = (content: string) => {
     if (!activeId) return;
-
-    // Auto-extract title from the first heading if possible, or keep existing
     const firstLine = content.split('\n')[0].replace(/^#+\s*/, '').trim();
     const title = firstLine || 'Untitled Note';
-
-    setNotes(notes.map(n => 
-      n.id === activeId 
-        ? { ...n, content, title, updatedAt: new Date().toISOString().split('T')[0] } 
+    setNotes(notes.map(n =>
+      n.id === activeId
+        ? { ...n, content, title, updatedAt: new Date().toISOString().split('T')[0] }
         : n
     ));
+  };
+
+  const updateActiveTags = (tags: string[]) => {
+    if (!activeId) return;
+    setNotes(notes.map(n =>
+      n.id === activeId ? { ...n, tags, updatedAt: new Date().toISOString().split('T')[0] } : n
+    ));
+  };
+
+  const addTag = (tag: string) => {
+    if (!activeNote) return;
+    const t = tag.trim();
+    if (!t || activeNote.tags.includes(t)) return;
+    updateActiveTags([...activeNote.tags, t]);
+    setTagInput('');
+  };
+
+  const removeTag = (tag: string) => {
+    if (!activeNote) return;
+    updateActiveTags(activeNote.tags.filter(t => t !== tag));
   };
 
   const deleteNote = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!window.confirm('Delete this note?')) return;
-
     const remaining = notes.filter(n => n.id !== id);
     setNotes(remaining);
     if (activeId === id) {
@@ -88,13 +113,18 @@ export default function NotesVault() {
     URL.revokeObjectURL(url);
   };
 
-  // Filter notes by search query
-  const filteredNotes = notes.filter(n => 
-    n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    n.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const allTags = Array.from(new Set(notes.flatMap(n => n.tags)));
 
-  // Simple Markdown renderer
+  const filteredNotes = notes.filter(n => {
+    const q = searchQuery.toLowerCase();
+    const matchesQuery =
+      n.title.toLowerCase().includes(q) ||
+      n.content.toLowerCase().includes(q) ||
+      n.tags.some(t => t.toLowerCase().includes(q));
+    const matchesTag = !activeTag || n.tags.includes(activeTag);
+    return matchesQuery && matchesTag;
+  });
+
   const renderMarkdown = (text: string) => {
     const html = text
       .replace(/&/g, '&amp;')
@@ -109,20 +139,18 @@ export default function NotesVault() {
       .replace(/`([^`]+)`/g, '<code class="bg-slate-950 text-indigo-300 px-1.5 py-0.5 rounded font-mono text-xs border border-slate-800">$1</code>')
       .replace(/^- (.*$)/gim, '<li class="list-disc ml-5 my-1 text-slate-300">$1</li>')
       .replace(/\n\n/g, '</p><p class="my-2 text-slate-300 leading-relaxed">');
-
     return `<div class="text-xs text-slate-300 leading-relaxed"><p class="my-2">${html}</p></div>`;
   };
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-6 text-white flex flex-col h-[calc(100vh-80px)]">
-      
-      {/* Header */}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 pb-3 border-b border-slate-800 gap-3">
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2">
-            <FileText className="w-6 h-6 text-indigo-400" /> 10. Rich Notes Vault
+            <FileText className="w-6 h-6 text-indigo-400" /> 10. Knowledge Base & Notes Workspace
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">Create, edit, organize, and export your markdown notes in a persistent vault.</p>
+          <p className="text-xs text-slate-400 mt-0.5">Create, tag, search, and export your markdown notes in a persistent vault.</p>
         </div>
 
         <button
@@ -133,12 +161,10 @@ export default function NotesVault() {
         </button>
       </div>
 
-      {/* Main Layout: Sidebar + Editor */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1 min-h-0">
-        
-        {/* Sidebar: Notes List */}
+
         <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-lg flex flex-col overflow-hidden md:col-span-1">
-          <div className="p-3 border-b border-slate-800">
+          <div className="p-3 border-b border-slate-800 space-y-2">
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5" />
               <input
@@ -146,12 +172,29 @@ export default function NotesVault() {
                 placeholder="Search notes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 [&::-webkit-scrollbar]:hidden"
               />
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                onClick={() => setActiveTag(null)}
+                className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border transition-all ${activeTag === null ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'}`}
+              >
+                All
+              </button>
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border transition-all ${activeTag === tag ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'}`}
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+          <div className="flex-1 overflow-y-auto p-2 space-y-1.5 [&::-webkit-scrollbar]:hidden">
             {filteredNotes.length === 0 ? (
               <div className="text-center py-8 text-slate-500 text-xs px-2">
                 No notes found. Click "New Note" to start!
@@ -162,13 +205,18 @@ export default function NotesVault() {
                   key={note.id}
                   onClick={() => setActiveId(note.id)}
                   className={`p-3 rounded-xl border transition-all cursor-pointer flex justify-between items-start group ${
-                    activeId === note.id 
-                      ? 'bg-indigo-950/40 border-indigo-900/60 text-white' 
+                    activeId === note.id
+                      ? 'bg-indigo-950/40 border-indigo-900/60 text-white'
                       : 'bg-slate-950/40 border-slate-800/60 text-slate-400 hover:bg-slate-800/40 hover:text-slate-200'
                   }`}
                 >
                   <div className="min-w-0 pr-2">
                     <div className="text-xs font-semibold truncate text-slate-200">{note.title}</div>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {note.tags.map(t => (
+                        <span key={t} className="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-950/60 text-indigo-300 border border-indigo-900/40">{t}</span>
+                      ))}
+                    </div>
                     <div className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
                       <Calendar className="w-3 h-3" /> {note.updatedAt}
                     </div>
@@ -186,14 +234,12 @@ export default function NotesVault() {
           </div>
         </div>
 
-        {/* Editor & Preview Pane */}
         <div className="md:col-span-3 flex flex-col bg-slate-900 border border-slate-800 rounded-2xl shadow-lg overflow-hidden">
           {activeNote ? (
             <>
-              {/* Note Toolbar */}
-              <div className="bg-slate-950/60 px-4 py-2 border-b border-slate-800 flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-300 truncate max-w- 50">{activeNote.title}</span>
-                
+              <div className="bg-slate-950/60 px-4 py-2 border-b border-slate-800 flex justify-between items-center text-xs gap-3">
+                <span className="font-semibold text-slate-300 truncate">{activeNote.title}</span>
+
                 <div className="flex items-center gap-2">
                   <div className="hidden sm:flex bg-slate-900 p-1 rounded-xl border border-slate-800">
                     <button
@@ -234,21 +280,47 @@ export default function NotesVault() {
                 </div>
               </div>
 
-              {/* Editor/Preview Split Grid */}
+              <div className="px-4 py-2 border-b border-slate-800 flex items-center gap-2 flex-wrap">
+                <Tag className="w-3.5 h-3.5 text-slate-500" />
+                {activeNote.tags.map(t => (
+                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-950/60 text-indigo-300 border border-indigo-900/40 flex items-center gap-1">
+                    {t}
+                    <button onClick={() => removeTag(t)} className="hover:text-rose-400">×</button>
+                  </span>
+                ))}
+                <input
+                  type="text"
+                  placeholder="Add tag..."
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(tagInput); } }}
+                  className="bg-slate-950 border border-slate-800 rounded-lg px-2 py-0.5 text-[10px] text-white focus:outline-none focus:border-indigo-500 w-24"
+                />
+                <div className="flex gap-1 flex-wrap">
+                  {CATEGORIES.filter(c => !activeNote.tags.includes(c)).map(c => (
+                    <button
+                      key={c}
+                      onClick={() => addTag(c)}
+                      className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-950 border border-slate-800 text-slate-500 hover:text-slate-200"
+                    >
+                      +{c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 flex-1 min-h-0">
-                {/* Editor textarea */}
                 <div className={`flex flex-col h-full ${viewMode === 'preview' ? 'hidden' : viewMode === 'edit' ? 'col-span-2' : ''}`}>
                   <textarea
                     value={activeNote.content}
                     onChange={(e) => updateActiveContent(e.target.value)}
                     placeholder="Write your note in markdown..."
-                    className="w-full h-full bg-transparent p-4 text-xs font-mono text-slate-200 focus:outline-none resize-none leading-relaxed"
+                    className="w-full h-full bg-transparent p-4 text-xs font-mono text-slate-200 focus:outline-none resize-none leading-relaxed [&::-webkit-scrollbar]:hidden"
                     spellCheck="false"
                   />
                 </div>
 
-                {/* Preview pane */}
-                <div className={`flex flex-col h-full bg-slate-950/40 p-5 overflow-y-auto border-l border-slate-800 ${viewMode === 'edit' ? 'hidden' : viewMode === 'preview' ? 'col-span-2 border-l-0' : ''}`}>
+                <div className={`flex flex-col h-full bg-slate-950/40 p-5 overflow-y-auto border-l border-slate-800 [&::-webkit-scrollbar]:hidden ${viewMode === 'edit' ? 'hidden' : viewMode === 'preview' ? 'col-span-2 border-l-0' : ''}`}>
                   <div dangerouslySetInnerHTML={{ __html: renderMarkdown(activeNote.content) }} />
                 </div>
               </div>
