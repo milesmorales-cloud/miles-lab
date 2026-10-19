@@ -9,7 +9,7 @@ Welcome to **Miles Lab**, a production-grade React & TypeScript monorepo designe
 * **Icons:** Lucide React
 * **Persistence:** Browser `localStorage` (Session & State Management)
 
-## 📁 Completed Projects Included (8 / 25)
+## 📁 Completed Projects Included (15 / 25)
 1. **00 - Central Dashboard Hub**: Master navigation hub with sidebar routing and project categorization.
 2. **01 - Calculator**: High-precision math utility with clean state architecture.
 3. **02 - Digital Clock**: Real-time timezone and clock management.
@@ -18,7 +18,13 @@ Welcome to **Miles Lab**, a production-grade React & TypeScript monorepo designe
 6. **05 - Auth & RBAC Gateway**: Secure session management and Role-Based Access Control (Admin, Teacher, Student).
 7. **06 - Quiz LMS Portal**: Dual-mode Learning Management System with a Student quiz-taker and a Teacher authoring/hosting dashboard.
 8. **07 - Pomodoro Focus Timer**: State-driven interval timer with focus/break cycles and completion tracking.
+9. **Expense & Budget Tracker** | Cash-flow overview, category budget caps, warning indicators, and metrics |
+10. **Markdown Previewer** | Split-pane live markdown rendering and export |
+11. **Notes & Markdown Vault** | Local-first markdown editor, instant search, tag filters |
+12. **Habit Tracker** | Daily habit streaks, completion logs, visual heatmaps |
 13. **13 - Supermarket Hub**: E-commerce storefront paired with an active inventory CRUD admin panel.
+14. **Kanban Board** | Multi-column task pipelines, drag/move states, priority tags |
+15. **Advanced Booking & Event Calendar** | Multi-year historical lookups, live Nager.Date API public holidays, custom daily plans, and active reminders |
 
 ## 🚀 Getting Started Locally
 
