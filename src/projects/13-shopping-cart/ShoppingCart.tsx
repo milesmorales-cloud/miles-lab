@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, Minus, Trash2, Tag, CheckCircle2, ArrowRight, Filter, Settings, Store, PlusCircle } from 'lucide-react';
 
 interface Product {
@@ -26,10 +26,13 @@ const INITIAL_PRODUCTS: Product[] = [
   { id: 10, name: 'LED Desk Lamp', price: 49.99, category: 'Accessories', image: '💡' },
 ];
 
-const CATEGORIES = ['All', 'Hardware', 'Audio', 'Displays', 'Wearables', 'Accessories'];
-
 export default function ShoppingCart() {
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [categories, setCategories] = useState<string[]>(() => {
+    const saved = localStorage.getItem('miles_lab_shop_categories');
+    return saved ? JSON.parse(saved) : ['Hardware', 'Audio', 'Displays', 'Wearables', 'Accessories'];
+  });
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [cart, setCart] = useState<CartItem[]>([
     { ...INITIAL_PRODUCTS[0], quantity: 1 },
     { ...INITIAL_PRODUCTS[1], quantity: 2 },
@@ -38,11 +41,23 @@ export default function ShoppingCart() {
   const [activeTab, setActiveTab] = useState<'store' | 'admin'>('store');
   const [checkoutComplete, setCheckoutComplete] = useState(false);
 
+  useEffect(() => {
+    localStorage.setItem('miles_lab_shop_categories', JSON.stringify(categories));
+  }, [categories]);
+
   // New Product Form State (for Supermarket Admin)
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newCategory, setNewCategory] = useState('Hardware');
   const [newImage, setNewImage] = useState('🛒');
+
+  const handleAddCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = newCategoryName.trim();
+    if (!name || categories.includes(name)) return;
+    setCategories([...categories, name]);
+    setNewCategoryName('');
+  };
 
   // Filter products based on selected category
   const filteredProducts = selectedCategory === 'All' 
@@ -170,7 +185,7 @@ export default function ShoppingCart() {
               {/* Category Filter Bar */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-3 mb-4 no-scrollbar border-b border-slate-800/80">
                 <Filter className="w-3.5 h-3.5 text-slate-500 shrink-0 mr-1" />
-                {CATEGORIES.map(category => (
+                {['All', ...categories].map(category => (
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
@@ -317,13 +332,27 @@ export default function ShoppingCart() {
                 </div>
 
                 <div>
+                  <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Create Category</label>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      placeholder="e.g. Groceries"
+                      className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    />
+                    <button type="button" onClick={handleAddCategory} className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs font-semibold">Add</button>
+                  </div>
+                </div>
+
+                <div>
                   <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Category</label>
                   <select
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
                     className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
                   >
-                    {CATEGORIES.filter(c => c !== 'All').map(cat => (
+                    {categories.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
