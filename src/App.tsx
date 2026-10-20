@@ -17,7 +17,8 @@ import {
   FileText,
   Utensils,
   Columns,
-  Calendar
+  Calendar,
+  MessageSquare
 } from 'lucide-react';
 
 // Import your project components
@@ -36,6 +37,7 @@ import RecipePlanner from './projects/11-recipe-planner/RecipePlanner';
 import HabitTracker from './projects/12-habit-tracker/HabitTracker';
 import KanbanBoard from './projects/14-kanban-board/KanbanBoard';
 import BookingCalendar from './projects/15-booking-calendar/BookingCalendar';
+import ChatHub from './projects/16-chat-hub/ChatHub';
 
 interface ProjectItem {
   id: string;
@@ -67,6 +69,7 @@ export default function App() {
     { id: 'shop', number: '13', title: 'Supermarket Hub', category: 'E-Commerce', icon: ShoppingBag, component: ShoppingCart },
     { id: 'kanban', number: '14', title: 'Kanban Board', category: 'Productivity', icon: Columns, component: KanbanBoard },
     { id: 'booking', number: '15', title: 'Booking Calendar', category: 'Productivity', icon: Calendar, component: BookingCalendar },
+    { id: 'chat', number: '16', title: 'Chat Hub', category: 'Communication', icon: LayoutDashboard, component: ChatHub },
   ];
 
   const activeProject = PROJECTS.find(p => p.id === activeId) || PROJECTS[0];
@@ -184,6 +187,7 @@ function HubOverview({ onSelect }: { onSelect: (id: string) => void }) {
     { id: 'shop', number: '13', title: 'Supermarket Hub', category: 'E-Commerce', icon: ShoppingBag },
     { id: 'kanban', number: '14', title: 'Kanban Board', category: 'Productivity', icon: Columns },
     { id: 'booking', number: '15', title: 'Booking Calendar', category: 'Productivity', icon: Calendar },
+    { id: 'chat', number: '16', title: 'Chat Hub', category: 'Communication', icon: MessageSquare },
   ];
 
   return (
