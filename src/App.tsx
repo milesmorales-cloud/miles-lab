@@ -18,7 +18,9 @@ import {
   Utensils,
   Columns,
   Calendar,
-  MessageSquare
+  MessageSquare,
+  Currency,
+  Palette
 } from 'lucide-react';
 
 // Import your project components
@@ -38,6 +40,8 @@ import HabitTracker from './projects/12-habit-tracker/HabitTracker';
 import KanbanBoard from './projects/14-kanban-board/KanbanBoard';
 import BookingCalendar from './projects/15-booking-calendar/BookingCalendar';
 import ChatHub from './projects/16-chat-hub/ChatHub';
+import CurrencyConverter from './projects/17-currency-converter/CurrencyConverter';
+import ColorGenerator from './projects/18-color-generator/ColorGenerator';
 
 interface ProjectItem {
   id: string;
@@ -70,6 +74,8 @@ export default function App() {
     { id: 'kanban', number: '14', title: 'Kanban Board', category: 'Productivity', icon: Columns, component: KanbanBoard },
     { id: 'booking', number: '15', title: 'Booking Calendar', category: 'Productivity', icon: Calendar, component: BookingCalendar },
     { id: 'chat', number: '16', title: 'Chat Hub', category: 'Communication', icon: LayoutDashboard, component: ChatHub },
+    { id: 'converter', number: '17', title: 'Currency Converter', category: 'Finance', icon: Currency, component: CurrencyConverter },
+    { id: 'color', number: '18', title: 'Color Generator', category: 'Design', icon: Palette, component: ColorGenerator },
   ];
 
   const activeProject = PROJECTS.find(p => p.id === activeId) || PROJECTS[0];
@@ -188,6 +194,8 @@ function HubOverview({ onSelect }: { onSelect: (id: string) => void }) {
     { id: 'kanban', number: '14', title: 'Kanban Board', category: 'Productivity', icon: Columns },
     { id: 'booking', number: '15', title: 'Booking Calendar', category: 'Productivity', icon: Calendar },
     { id: 'chat', number: '16', title: 'Chat Hub', category: 'Communication', icon: MessageSquare },
+    { id: 'converter', number: '17', title: 'Currency Converter', category: 'Finance', icon: Currency },
+    { id: 'color', number: '18', title: 'Color Generator', category: 'Design', icon: Palette },
   ];
 
   return (
